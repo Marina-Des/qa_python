@@ -32,6 +32,12 @@ class TestBooksCollector:
             self.books_collector.books_genre['книга_1_'+ i]=i
             self.books_collector.books_genre['книга_2_'+ i]=i
 
+    
+    @pytest.fixture(autouse=False)
+    def book_collector_with_1book_in_favorites(self):
+        self.books_collector.books_genre['книга_в_списке_в_избранном']=''
+        self.books_collector.favorites = ['книга_в_списке_в_избранном']
+
 
     @pytest.mark.parametrize ('book_name, test_status', [
         ['', False], 
@@ -79,7 +85,8 @@ class TestBooksCollector:
         books_with_genre=self.books_collector.get_books_with_specific_genre('фОнтастика')
         assert books_with_genre==[]
 
-    #def test_get_books_genre(self):
+    def test_get_books_genre(self):
+        assert self.books_collector.get_books_genre() == {'книга_в_списке': '', 'книга_в_списке_фантастика': 'Фантастика'}
 
 
     def test_get_books_for_children_on_2books_per_genre (self, books_collector_with_2books_per_genre):
@@ -91,8 +98,9 @@ class TestBooksCollector:
         ['книга_в_списке', True], 
         ['книга_не_в_списке', False], 
         ['книга_в_списке_в_избранном', True]])
-    def test_add_book_in_favorites(self, book_name, test_status):
-        self.books_collector.books_genre['книга_в_списке_в_избранном']=''
-        self.books_collector.favorites = ['книга_в_списке_в_избранном']
+    def test_add_book_in_favorites(self, book_name, test_status, book_collector_with_1book_in_favorites):
         self.books_collector.add_book_in_favorites(book_name)
         assert ((book_name in self.books_collector.favorites) and (self.books_collector.favorites.count(book_name)<=1) ) == test_status
+
+
+
